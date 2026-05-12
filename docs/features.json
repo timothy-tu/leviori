@@ -642,14 +642,20 @@
     "view": "both",
     "stage": 1,
     "patientItems": [
-      "Responsive design testing"
+      "Local dev environment (Postgres, Node)",
+      "Staging environment (AWS Amplify + App Runner + RDS)",
+      "Production environment (same stack, separate config)"
     ],
     "clinicItems": [
-      "DB schema design, CI/CD, hosting setup, testing, bug fixes, polish"
+      "DB schema design + migrations",
+      "CI/CD pipeline (repo → Amplify/App Runner auto-deploy)",
+      "S3 encrypted buckets for file storage",
+      "RDS automated backups (7-day retention, point-in-time recovery)",
+      "Backup restoration test + documented backup policy (HIPAA)"
     ],
     "gaps": [],
-    "hoursMin": 30,
-    "hoursMax": 50
+    "hoursMin": 15,
+    "hoursMax": 20
   },
   {
     "name": "Buffer & Bug Fixes (10%)",
@@ -662,8 +668,8 @@
       "Bug fixes, edge cases, polish"
     ],
     "gaps": [],
-    "hoursMin": 22,
-    "hoursMax": 34
+    "hoursMin": 21,
+    "hoursMax": 31
   },
   {
     "name": "Buffer & Bug Fixes (10%)",
