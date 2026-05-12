@@ -658,7 +658,7 @@
     "hoursMax": 20
   },
   {
-    "name": "Buffer & Bug Fixes (10%)",
+    "name": "Buffer & Bug Fixes (20%)",
     "view": "both",
     "stage": 1,
     "patientItems": [
@@ -668,11 +668,11 @@
       "Bug fixes, edge cases, polish"
     ],
     "gaps": [],
-    "hoursMin": 21,
-    "hoursMax": 31
+    "hoursMin": 41,
+    "hoursMax": 61
   },
   {
-    "name": "Buffer & Bug Fixes (10%)",
+    "name": "Buffer & Bug Fixes (20%)",
     "view": "both",
     "stage": 2,
     "patientItems": [
@@ -682,7 +682,7 @@
       "Bug fixes, edge cases, polish"
     ],
     "gaps": [],
-    "hoursMin": 21,
-    "hoursMax": 31
+    "hoursMin": 41,
+    "hoursMax": 61
   }
 ]
