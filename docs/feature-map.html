@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumera Feature Map</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --text: #1a1a2e;
+    --text-secondary: #555;
+    --border: #e0e0e0;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --patient: #7c3aed;
+    --patient-bg: #f5f3ff;
+    --clinic: #0891b2;
+    --clinic-bg: #ecfeff;
+    --both-bg: #f0fdf4;
+    --both: #16a34a;
+    --stage1: #2563eb;
+    --stage2: #8b5cf6;
+    --workaround-bg: #fefce8;
+    --workaround-border: #ca8a04;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  header { margin-bottom: 1.5rem; }
+  header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem; }
+  header p { color: var(--text-secondary); font-size: 0.9rem; }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toolbar-group { display: flex; gap: 0.25rem; }
+
+  .toolbar-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .toolbar-right {
+    display: flex;
+    gap: 0.25rem;
+    justify-self: end;
+  }
+
+  .pill-btn {
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    background: var(--surface);
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+  }
+
+  .pill-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pill-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+    min-width: 120px;
+  }
+
+  .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+
+  .feature-header {
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .feature-header:hover { background: var(--accent-light); }
+
+  .feature-arrow {
+    font-size: 0.65rem;
+    color: var(--accent);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .feature-card.open .feature-arrow { transform: rotate(90deg); }
+
+  .feature-name { font-weight: 600; font-size: 0.95rem; }
+
+  .feature-badges { margin-left: auto; display: flex; gap: 0.4rem; flex-shrink: 0; }
+
+  .badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .badge-stage1 { background: #eff6ff; color: var(--stage1); }
+  .badge-stage2 { background: #f5f3ff; color: var(--stage2); }
+  .badge-patient { background: var(--patient-bg); color: var(--patient); }
+  .badge-clinic { background: var(--clinic-bg); color: var(--clinic); }
+  .badge-both { background: var(--both-bg); color: var(--both); }
+
+  .feature-body {
+    display: none;
+    padding: 0 1rem 1rem;
+  }
+
+  .feature-card.open .feature-body { display: block; }
+
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .column-header {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 2px solid;
+  }
+
+  .column-header.patient { color: var(--patient); border-color: var(--patient); }
+  .column-header.clinic { color: var(--clinic); border-color: var(--clinic); }
+
+  .column ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .column li {
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+    padding-left: 1rem;
+    position: relative;
+    color: var(--text);
+  }
+
+  .column li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .column.patient-col li::before { background: var(--patient); }
+  .column.clinic-col li::before { background: var(--clinic); }
+
+  .empty-col {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 0.25rem 0;
+  }
+
+  .workaround {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--workaround-bg);
+    border-left: 3px solid var(--workaround-border);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.8rem;
+    color: #92400e;
+  }
+
+  .workaround-label {
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .gap-section {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: #fef2f2;
+    border-left: 3px solid #dc2626;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .gap-label {
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #dc2626;
+    margin-bottom: 0.25rem;
+  }
+
+  .gap-section ul { list-style: none; padding: 0; }
+
+  .gap-section li {
+    font-size: 0.83rem;
+    padding: 0.2rem 0;
+    padding-left: 0.9rem;
+    position: relative;
+    color: #991b1b;
+  }
+
+  .gap-section li::before {
+    content: '?';
+    position: absolute;
+    left: 0;
+    font-weight: 700;
+    color: #dc2626;
+    font-size: 0.75rem;
+  }
+
+  .badge-gap {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+
+  .item-counts {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  .hours-badge {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .back-to-top {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .back-to-top.visible { opacity: 1; pointer-events: auto; }
+  .back-to-top:hover { transform: scale(1.1); }
+
+  @media (max-width: 640px) {
+    body { padding: 1rem; }
+    .columns { grid-template-columns: 1fr; }
+    .stats { gap: 0.75rem; }
+    .stat { min-width: 90px; padding: 0.5rem 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Lumera Feature Map</h1>
+  <p>Features, views, and stages. Update features.json to change content.</p>
+</header>
+
+<div class="toolbar">
+  <span class="toolbar-label">Phase</span>
+  <div class="toolbar-group" id="stageFilter">
+    <button class="pill-btn active" data-filter="all">All</button>
+    <button class="pill-btn" data-filter="1">Launch</button>
+    <button class="pill-btn" data-filter="2">Enhancement</button>
+  </div>
+  <div class="toolbar-right">
+    <button class="pill-btn" onclick="toggleAllCards(true)">Expand All</button>
+    <button class="pill-btn" onclick="toggleAllCards(false)">Collapse All</button>
+  </div>
+
+  <span class="toolbar-label">View</span>
+  <div class="toolbar-group" id="viewFilter">
+    <button class="pill-btn active" data-filter="all">All</button>
+    <button class="pill-btn" data-filter="patient">Patient</button>
+    <button class="pill-btn" data-filter="clinic">Clinic</button>
+    <button class="pill-btn" data-filter="both">Both</button>
+  </div>
+  <div class="toolbar-right" id="showFilter">
+    <button class="pill-btn active" data-filter="features">All Features</button>
+    <button class="pill-btn" data-filter="gaps">Gaps Only</button>
+  </div>
+</div>
+
+<div class="stats" id="stats"></div>
+<div id="featureList"></div>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
+
+<script>
+const features = [{"name":"Admin Panel","view":"clinic","stage":2,"patientItems":[],"clinicItems":["Document review queue (cross-patient)","Patient stage management rules","Bulk communication / broadcast messaging"],"gaps":[],"hoursMin":8,"hoursMax":12},{"name":"Advanced Analytics","view":"clinic","stage":2,"patientItems":[],"clinicItems":["Revenue dashboards and charts","Revenue by procedure breakdown","Patient outcome analytics (avg weight loss, complication rates)","Application funnel metrics","Diet compliance analytics","Aftercare adherence rates","Coordinator performance metrics","Revenue forecasting"],"gaps":[],"hoursMin":24,"hoursMax":35},{"name":"Advanced Compliance","view":"both","stage":2,"patientItems":["Export patient data on request"],"clinicItems":["NOM-024 specific requirements","Audit log viewer UI","Data retention automation (HIPAA 6yr, NOM-024 7yr)","Breach incident management workflow"],"gaps":[],"hoursMin":12,"hoursMax":18},{"name":"Advanced Diet Features","view":"both","stage":2,"patientItems":["Meal completion checkboxes / compliance tracking","Shopping guides (store-specific brand recommendations)","Grocery list generation","Recipe ideas"],"clinicItems":["Diet compliance view per patient (which phase, following it?)","Diet plan CMS editor (create/edit meals, macros, shopping lists)","Mexico store localization (Mexican patients need local store options)"],"gaps":[],"hoursMin":12,"hoursMax":18},{"name":"Advanced Notifications","view":"both","stage":2,"patientItems":["SMS notifications via Twilio","Web push notifications","Notification center (bell dropdown with list)"],"clinicItems":["SMS notifications via Twilio","Web push notifications","Notification center (bell dropdown with list)","Notification batching / digest"],"workaround":"Email notifications only at launch","gaps":[],"hoursMin":10,"hoursMax":15},{"name":"Advanced Scheduling","view":"both","stage":2,"patientItems":["Waitlist when slots are full","Cancellation flow with refund trigger"],"clinicItems":["Concurrent booking prevention (optimistic locking)","Surgeon vacation / unavailability blocking","Cancellation management with automated refund"],"gaps":[],"hoursMin":10,"hoursMax":15},{"name":"Aftercare","view":"both","stage":1,"patientItems":["Follow-up timeline (week 1, month 1, 3, 6, year 1, year 2+)","Each item: timing, title, date/time, format, agenda","Confirm / reschedule actions per appointment","\"Add to calendar\" download (.ics file)","24-hour care line phone number"],"clinicItems":["Patient stage tabs in roster (pre-op, recovery, follow-up, discharged)","Follow-up stage labels per patient (3mo, 6mo, 12mo, overdue)"],"gaps":["Are follow-up appointments auto-generated from surgery date, or manually created?","\"Reschedule\" button: opens calendar picker, or goes through coordinator?","Where do surgeons document clinical notes from follow-up consults?"],"hoursMin":8,"hoursMax":12},{"name":"Aftercare Management (Clinic)","view":"clinic","stage":2,"patientItems":[],"clinicItems":["Aftercare calendar across all patients","Auto-generated follow-up appointments from surgery date","Aftercare compliance tracking (who attended, who missed)","Lab order generation for follow-up labs"],"workaround":"Track follow-ups via patient roster stage tabs","gaps":[],"hoursMin":10,"hoursMax":15},{"name":"AI Features","view":"clinic","stage":2,"patientItems":[],"clinicItems":["Patient risk scoring","Application summaries","Suggested approval actions","AI messaging suggestions"],"gaps":[],"hoursMin":16,"hoursMax":24},{"name":"Application / Intake","view":"both","stage":1,"patientItems":["5-step wizard (procedure, about you, medical history, lifestyle, review)","Digital signature on review step","Save draft (steps 2-4)","Application submitted confirmation with next steps","All-inclusive pricing display per procedure"],"clinicItems":["Application queue with tabs (pending, approved, declined, more info requested)","Patient detail view (medical history, lifestyle, body measurements, BMI)","Approve / decline / request more info actions","Internal notes per patient (threaded, multi-staff)","Search + filter applications"],"gaps":["\"Request more info\" return flow: what does the patient see? Message or reopened form?","Decline flow: does the patient see a reason? Can they reapply?","\"Not sure yet\" free consult: how is the 30-min video consult scheduled?","BMI eligibility: what happens if BMI is below threshold?"],"hoursMin":16,"hoursMax":24},{"name":"Authentication","view":"both","stage":1,"patientItems":["Email/password login","Password reset flow","Session management (logout, active sessions)","Sign-in history log","Account deletion (soft delete + confirmation)"],"clinicItems":["Email/password login","Password reset flow","Session management (logout, active sessions)","3 roles with scoped views (Patient, Coordinator, Surgeon)","MFA for clinic staff"],"gaps":["Can patients apply without an account, or must they register first?","Permissions matrix: what can each clinic role see and do?","What does the first-login experience look like for a new patient?"],"hoursMin":8,"hoursMax":12},{"name":"Dashboard","view":"both","stage":1,"patientItems":["Journey tracker (application > schedule > stay > payment)","Pre-op checklist with links to relevant screens","Status banner (approved, scheduled, etc.)","Recent messages widget"],"clinicItems":["Today's surgeries list (time, patient, procedure, OR room, status)","Applications to review count","Unread messages count","Recent activity feed (timestamped events)","Monthly progress (surgeries completed vs target)"],"gaps":[],"hoursMin":8,"hoursMax":12},{"name":"Diet Plan","view":"both","stage":1,"patientItems":["5-phase plan view (liver shrinking, clear liquids, hospital, full liquid, pureed)","Phase timeline with current phase + progress bar","Day picker within each phase","Meal cards (time, name, calories, protein, ingredients)","Daily nutrition targets with progress bars","Avoid lists per phase","Supplements list with brands and dosages"],"clinicItems":["Diet plan templates (one per procedure type)","View/assign diet plan template to patient"],"gaps":["How is the diet plan assigned to a patient? Auto from procedure, or clinic assigns manually?","How do diet plan dates auto-calculate from the actual surgery date?","\"Ask Sofia\" quick link: is this a message to coordinator, or an AI chatbot?"],"hoursMin":16,"hoursMax":24},{"name":"Documents & Consent","view":"both","stage":1,"patientItems":["Upload lab results (PDF/image)","Sign informed consent (digital signature)","View document status (awaiting signature, not uploaded, complete)","Download clinic PDFs (pre-op guide, diet plan, recovery guide, travel pack)"],"clinicItems":["View uploaded documents per patient","Consent form templates (view/edit)","Document templates (discharge summary, lab order, travel pack)"],"gaps":["Does the surgeon need to countersign informed consent?","How are merge-field document templates (discharge summary, lab order) generated per patient?"],"hoursMin":12,"hoursMax":18},{"name":"Earnings Page","view":"clinic","stage":2,"patientItems":[],"clinicItems":["Monthly/YTD revenue stat cards","Revenue bar chart with period toggles","Recent payments table","Outstanding balances with bulk reminders","CFDI invoice generation (SAT Mexico)"],"workaround":"Use accounting software for revenue tracking","gaps":[],"hoursMin":12,"hoursMax":18},{"name":"Help Center","view":"patient","stage":1,"patientItems":["Static FAQ page with accordion sections"],"clinicItems":[],"gaps":[],"hoursMin":2,"hoursMax":4},{"name":"HIPAA Compliance","view":"both","stage":1,"patientItems":["Encrypted data (TLS + at rest)","Patient isolation (own records only)","HIPAA consent checkbox on application"],"clinicItems":["Encrypted data (TLS + at rest)","Audit logs (who accessed what, when)","Role-based access (3 roles with scoped views)","Secure hosting (HIPAA-ready infrastructure)","MFA for clinic staff"],"gaps":["Hosting decision: Supabase HIPAA add-on, or AWS direct?"],"hoursMin":20,"hoursMax":30},{"name":"Infrastructure & QA","view":"both","stage":1,"patientItems":["Responsive design testing"],"clinicItems":["DB schema design, CI/CD, hosting setup, testing, bug fixes, polish"],"gaps":[],"hoursMin":30,"hoursMax":50},{"name":"Integrations","view":"clinic","stage":2,"patientItems":[],"clinicItems":["Google Calendar sync (OR schedule to personal calendars)","Slack notifications (critical alerts)","QuickBooks / Xero sync (accounting auto-sync)"],"workaround":"Staff check OR calendar in-app; export CSV for accounting","gaps":[],"hoursMin":16,"hoursMax":24},{"name":"Messaging","view":"both","stage":1,"patientItems":["Threaded conversations with care team","Message compose (text + file attachments)","Unread indicators / badge counts","\"Online now\" status indicator","SLA notice (replies within 4 working hours)"],"clinicItems":["Patient inbox (all patient threads)","Quick reply templates (schedule call, send guide, refer to coordinator)","\"Open profile\" button to jump to patient detail","Unread indicators / badge counts"],"gaps":["Which automated messages send and when? Full trigger list needed","Conversation assignment: which staff member handles which patient threads?"],"hoursMin":12,"hoursMax":20},{"name":"Notifications","view":"both","stage":1,"patientItems":["Email notifications (application status, new messages, appointment reminders)","Notification preference toggles in profile"],"clinicItems":["Email notifications (new application, payment received, document uploaded)","Badge counts on sidebar nav items (applications, messages)"],"gaps":["Which email service? SendGrid? Postmark?","Full list of notification types and triggers needed"],"hoursMin":8,"hoursMax":12},{"name":"Other Enhancements","view":"both","stage":2,"patientItems":["Public-facing landing page / intake","Financing payment option (clinic partner integration)"],"clinicItems":["Global search (patients, messages, documents)","Financing application tracking","\"Pay on arrival\" trust flow (confirmation deposit)"],"gaps":[],"hoursMin":10,"hoursMax":15},{"name":"Patient Roster","view":"clinic","stage":1,"patientItems":[],"clinicItems":["Patient list with stage tabs (pre-op, recovery, follow-up, discharged)","Search + filter + export","Table: patient, procedure, stage, surgery date, weight loss, next milestone, last activity","Overdue check-in rows highlighted","Pagination"],"gaps":[],"hoursMin":6,"hoursMax":10},{"name":"Payment","view":"both","stage":1,"patientItems":["Pay in full via Stripe (5% discount)","Deposit $500 via Stripe + balance on arrival","Pay on arrival option","Card payment form (name, number, expiry, CVC)","Order summary (procedure, add-ons, discount, total)","Refund policy display"],"clinicItems":["Record on-arrival payment (manual entry)","Payment history per patient","Refund processing (via Stripe)","Outstanding balances list"],"gaps":["\"Deposit + balance\": how is the in-person balance recorded and linked to the Stripe deposit?","\"Pay on arrival\": no financial commitment online. What prevents no-shows?","Financing option: which partner (Affirm? CareCredit?)? In scope for Phase 1?","Stripe US or Stripe Mexico? Affects currency, payouts, and CFDI invoices","Who initiates refunds? Full auto or admin approval required?"],"hoursMin":24,"hoursMax":35},{"name":"Profile & Settings","view":"both","stage":1,"patientItems":["Personal info (name, DOB, gender, preferred name, photo)","Contact info (email, phone, address, emergency contact)","Care team display (lead surgeon, assisting surgeon, coordinator)","Notification preferences (7 toggles + channel selector)","Language, timezone, date format, measurement system"],"clinicItems":["Practice info (name, surgeon, license, RFC, address, phone, email)","Procedures and pricing (5 procedures, editable)","Hospital partner info (Hospital del Valle)","Hotel partner info (Hotel Sereno)","Patient portal branding (name, logo, color, URL, email sender)"],"gaps":[],"hoursMin":8,"hoursMax":12},{"name":"Progress Enhancements","view":"clinic","stage":2,"patientItems":[],"clinicItems":["Patient progress detail view (weight chart, photos, measurements)","Anomaly detection / clinical alerts (rapid weight gain, missed check-ins)"],"gaps":[],"hoursMin":8,"hoursMax":12},{"name":"Progress Tracking","view":"both","stage":1,"patientItems":["Weight logging (manual entry)","Weight chart (actual vs projected line chart)","Daily check-in form (weight, mood, water, walking, notes)","Progress photos (upload, 3-column grid, privacy note)","Body measurements (7 measurements with deltas)","Milestones timeline (started diet, lost 5kg, surgery, lost 10kg, etc.)"],"clinicItems":["Weight loss column in patient roster","Next milestone column in patient roster","Overdue check-in flagging (highlighted rows)"],"gaps":["Overdue check-in workflow: who contacts the patient? How is it logged and cleared?"],"hoursMin":12,"hoursMax":18},{"name":"Scheduling","view":"both","stage":1,"patientItems":["Monthly calendar view with available dates","Time slot picker (4 slots per day with descriptions)","Procedure confirmation card (surgeon, duration, price)","Confirm booking button","Reschedule up to 7 days before"],"clinicItems":["OR calendar (week/day/month views)","Color-coded by surgeon","Surgery event blocks (patient, procedure, OR room, duration)","Manual booking by staff","Add booking button"],"gaps":["Who sets which dates/time slots are available for booking? No availability editor shown","Rescheduling flow: what does the patient see? Back to calendar picker?","Booking confirmation: email? calendar invite? SMS reminder chain?","Time zone: US patients across 4 time zones see Tijuana (Pacific) local times. Show both?"],"hoursMin":20,"hoursMax":30},{"name":"Spanish Language Support","view":"both","stage":2,"patientItems":["Patient portal in Spanish","Language toggle (English / Spanish)"],"clinicItems":["Spanish consent forms","i18n infrastructure (English + Spanish)"],"gaps":[],"hoursMin":10,"hoursMax":15},{"name":"Team Management","view":"clinic","stage":2,"patientItems":[],"clinicItems":["On-call schedule editing","Staff invitation flow with role assignment","Staff performance metrics","Surgeon availability management"],"gaps":[],"hoursMin":8,"hoursMax":12},{"name":"Template System","view":"clinic","stage":2,"patientItems":[],"clinicItems":["Full template editor UI (diet plans, consent forms, documents)","Template versioning","Merge field / PDF generation pipeline","Automated trigger configuration"],"workaround":"Templates are developer-managed at launch","gaps":[],"hoursMin":16,"hoursMax":24},{"name":"Travel & Stay","view":"both","stage":1,"patientItems":["Travel dates form (arrival/departure date + time)","Flight numbers (inbound/outbound)","Airport pickup selection (SAN van, TIJ direct, self-arrange)","Hotel room type selection (standard, premium +$420, family +$890)","Companion info (name, relationship, phone, dietary preferences)"],"clinicItems":["View patient travel details in patient record","View companion info in patient record"],"gaps":["How does the clinic coordinate airport pickups? Who schedules the van?","How are hotel reservations confirmed with Hotel Sereno?","How does the clinic mark a patient as \"arrived\"?"],"hoursMin":6,"hoursMax":10},{"name":"Travel Management (Clinic)","view":"clinic","stage":2,"patientItems":[],"clinicItems":["Travel dashboard (all arrivals by date, pickups, hotel bookings)","Airport pickup scheduling / driver manifest","Hotel reservation coordination","Travel pack auto-generation","Arrival confirmation flow"],"workaround":"View travel details per patient in their record","gaps":[],"hoursMin":8,"hoursMax":12},{"name":"Video Consultations","view":"both","stage":2,"patientItems":["Built-in video call from messages (Zoom Healthcare integration)"],"clinicItems":["Built-in video call from patient thread (Zoom Healthcare integration)"],"workaround":"Use Google Meet or Zoom links manually","gaps":[],"hoursMin":12,"hoursMax":20}];
+
+let stageFilter = 'all';
+let viewFilter = 'all';
+let showFilter = 'features';
+
+function getFiltered() {
+  return features.filter(f => {
+    if (stageFilter !== 'all' && f.stage !== parseInt(stageFilter)) return false;
+    if (viewFilter !== 'all' && f.view !== viewFilter) return false;
+    if (showFilter === 'gaps' && (!f.gaps || f.gaps.length === 0)) return false;
+    return true;
+  });
+}
+
+function render() {
+  const filtered = getFiltered();
+
+  const totalFeatures = filtered.length;
+  const totalPatient = filtered.reduce((n, f) => n + f.patientItems.length, 0);
+  const totalClinic = filtered.reduce((n, f) => n + f.clinicItems.length, 0);
+  const totalGaps = filtered.reduce((n, f) => n + (f.gaps ? f.gaps.length : 0), 0);
+  const hoursMin = filtered.reduce((n, f) => n + (f.hoursMin || 0), 0);
+  const hoursMax = filtered.reduce((n, f) => n + (f.hoursMax || 0), 0);
+  const stage1 = filtered.filter(f => f.stage === 1).length;
+  const stage2 = filtered.filter(f => f.stage === 2).length;
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-value">${totalFeatures}</div><div class="stat-label">Features</div></div>
+    <div class="stat"><div class="stat-value">${hoursMin}&ndash;${hoursMax}</div><div class="stat-label">Hours (AI)</div></div>
+    <div class="stat"><div class="stat-value">${totalPatient}</div><div class="stat-label">Patient Items</div></div>
+    <div class="stat"><div class="stat-value">${totalClinic}</div><div class="stat-label">Clinic Items</div></div>
+    <div class="stat"><div class="stat-value">${totalGaps}</div><div class="stat-label">Open Gaps</div></div>
+  `;
+
+  const html = filtered.map((f, i) => {
+    const viewBadgeClass = f.view === 'patient' ? 'badge-patient' : f.view === 'clinic' ? 'badge-clinic' : 'badge-both';
+    const viewLabel = f.view === 'both' ? 'Patient + Clinic' : f.view.charAt(0).toUpperCase() + f.view.slice(1);
+    const stageBadgeClass = f.stage === 1 ? 'badge-stage1' : 'badge-stage2';
+    const stageLabel = f.stage === 1 ? 'Phase 1' : 'Phase 2';
+
+    const patientList = f.patientItems.length
+      ? f.patientItems.map(item => `<li>${esc(item)}</li>`).join('')
+      : '<div class="empty-col">No patient-facing items</div>';
+
+    const clinicList = f.clinicItems.length
+      ? f.clinicItems.map(item => `<li>${esc(item)}</li>`).join('')
+      : '<div class="empty-col">No clinic-facing items</div>';
+
+    const workaround = f.workaround
+      ? `<div class="workaround"><div class="workaround-label">Launch workaround</div>${esc(f.workaround)}</div>`
+      : '';
+
+    const gapHtml = (f.gaps && f.gaps.length > 0)
+      ? `<div class="gap-section"><div class="gap-label">Decisions needed (${f.gaps.length})</div><ul>${f.gaps.map(g => `<li>${esc(g)}</li>`).join('')}</ul></div>`
+      : '';
+
+    const gapBadge = (f.gaps && f.gaps.length > 0)
+      ? `<span class="badge badge-gap">${f.gaps.length} gap${f.gaps.length > 1 ? 's' : ''}</span>`
+      : '';
+
+    const hoursLabel = (f.hoursMin && f.hoursMax)
+      ? `<span class="hours-badge">${f.hoursMin}&ndash;${f.hoursMax}h</span>`
+      : '';
+
+    const counts = `${f.patientItems.length} patient, ${f.clinicItems.length} clinic`;
+
+    return `
+      <div class="feature-card" data-index="${i}">
+        <div class="feature-header" onclick="toggleCard(this)">
+          <span class="feature-arrow">&#9654;</span>
+          <span class="feature-name">${esc(f.name)}</span>
+          <span class="item-counts">${counts}</span>
+          <div class="feature-badges">
+            ${hoursLabel}
+            ${gapBadge}
+            <span class="badge ${viewBadgeClass}">${viewLabel}</span>
+            <span class="badge ${stageBadgeClass}">${stageLabel}</span>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="columns">
+            <div class="column patient-col">
+              <div class="column-header patient">Patient Portal</div>
+              <ul>${patientList}</ul>
+            </div>
+            <div class="column clinic-col">
+              <div class="column-header clinic">Clinic Console</div>
+              <ul>${clinicList}</ul>
+            </div>
+          </div>
+          ${workaround}
+          ${gapHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('featureList').innerHTML = html;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function toggleCard(header) {
+  header.closest('.feature-card').classList.toggle('open');
+}
+
+function toggleAllCards(open) {
+  document.querySelectorAll('.feature-card').forEach(c => {
+    c.classList.toggle('open', open);
+  });
+}
+
+document.getElementById('stageFilter').addEventListener('click', e => {
+  if (!e.target.classList.contains('pill-btn')) return;
+  document.querySelectorAll('#stageFilter .pill-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  stageFilter = e.target.dataset.filter;
+  render();
+});
+
+document.getElementById('viewFilter').addEventListener('click', e => {
+  if (!e.target.classList.contains('pill-btn')) return;
+  document.querySelectorAll('#viewFilter .pill-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  viewFilter = e.target.dataset.filter;
+  render();
+});
+
+document.getElementById('showFilter').addEventListener('click', e => {
+  if (!e.target.classList.contains('pill-btn')) return;
+  document.querySelectorAll('#showFilter .pill-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  showFilter = e.target.dataset.filter;
+  render();
+});
+
+window.addEventListener('scroll', () => {
+  document.getElementById('backToTop').classList.toggle('visible', window.scrollY > 300);
+});
+
+render();
+</script>
+
+</body>
+</html>
