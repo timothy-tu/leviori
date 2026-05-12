@@ -650,5 +650,33 @@
     "gaps": [],
     "hoursMin": 30,
     "hoursMax": 50
+  },
+  {
+    "name": "Buffer & Bug Fixes (10%)",
+    "view": "both",
+    "stage": 1,
+    "patientItems": [
+      "Bug fixes, edge cases, polish"
+    ],
+    "clinicItems": [
+      "Bug fixes, edge cases, polish"
+    ],
+    "gaps": [],
+    "hoursMin": 22,
+    "hoursMax": 34
+  },
+  {
+    "name": "Buffer & Bug Fixes (10%)",
+    "view": "both",
+    "stage": 2,
+    "patientItems": [
+      "Bug fixes, edge cases, polish"
+    ],
+    "clinicItems": [
+      "Bug fixes, edge cases, polish"
+    ],
+    "gaps": [],
+    "hoursMin": 21,
+    "hoursMax": 31
   }
 ]
